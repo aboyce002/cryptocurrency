@@ -13,7 +13,7 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class ScheduledTasks {
     private static final Logger log = LoggerFactory.getLogger(CryptocurrencyApplication.class);
-    private Currency currency;
+    private RestTemplate restTemplate = null;
 
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
@@ -22,14 +22,16 @@ public class ScheduledTasks {
 
     @Bean
     public CommandLineRunner run(RestTemplate restTemplate) throws Exception {
+        this.restTemplate = restTemplate;
         return args -> {
-            currency = restTemplate.getForObject("https://api.cryptonator.com/api/ticker/btc-usd", Currency.class);
+            Currency currency = restTemplate.getForObject("https://api.cryptonator.com/api/ticker/btc-usd", Currency.class);
             printCurrency();
         };
     }
 
     @Scheduled(fixedRate = 5000)
-    public void printCurrency(){
+    private void printCurrency(){
+        Currency currency = restTemplate.getForObject("https://api.cryptonator.com/api/ticker/btc-usd", Currency.class);
         log.info(currency.toString());
     }
 }
